@@ -13,7 +13,11 @@ static char			*get_buffer(void)
 		ft_bzero(buffer, BUFF_SIZE + 1);
 	}
 	while (buffer[i] == '\0')
+	{
+		if (i == BUFF_SIZE)
+			return (buffer);
 		i++;
+	}
 	return (buffer + i);
 }
 
@@ -22,10 +26,11 @@ int				read_fd(const int fd, int *nl_found)
 	int				nb;
 
 	nb = read(fd, BUFFER, BUFF_SIZE);
-	if (nb < 0)
+	if (nb <= 0)
 		return (nb);
 	BUFFER[nb] = '\0';
-	return (nb);
+
+	return (1);
 }
 
 char			*extract_line(char *line)
@@ -56,11 +61,22 @@ char			*extract_line(char *line)
 
 int				get_next_line(const int fd, char **line)
 {
-	char			*line;
+	char			*str;
 	int				nl_found;
+	int				read_val;
 
-	if (!BUFFER[0])
-		read_fd(fd, &nl_found);
-	else
+	str = NULL;
+	nl_found = 0;
+	while (!nl_found)
+	{
+		if ((read_val = read_fd(fd, &nl_found)) == 0)
+			return (read_val);
+		str = extract_line(str);
+		if (read_val == 0 && !str)
+			return (0);
+		*line = str;
+		return (1);
+	}
+
 
 }
