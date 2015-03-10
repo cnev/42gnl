@@ -24,20 +24,17 @@ static char			*get_buffer(int mode)
 int				read_fd(const int fd, int *nl_found)
 {
 	int				nb;
-int flag;
+	int				eof_flag;
+	char			*tmp;
+
 	if ((nb = read(fd, BUFFER, BUFF_SIZE)) < 1)
-       return (nb);
-       BUFFER[nb] = 0;
-    char *tmp = ft_strchr(BUFFER, 26);
-    if (tmp)
-       flag = 1;
-    else
-        flag = 0;
+		return (nb);
+	BUFFER[nb] = 0;
+	tmp = ft_strchr(BUFFER, 26);
+	eof_flag = (tmp) ? 1 : 0;
 	ft_memset(BUFFER + nb, '\0', BUFF_SIZE - nb);
-	if (flag)
-	{
-	  return(0);
-    }
+	if (eof_flag)
+		return(0);
 	if (!nb)
 		return (nb);
 	if (ft_strchr(BUFFER, '\n'))
@@ -79,21 +76,22 @@ int				get_next_line(const int fd, char **line)
 
 	str = NULL;
 	nl_found = 0;
-	read_val = 0;
+	read_val = -1;
 	while (!nl_found)
 	{
 		if (!BUFFER[0])
 			if ((read_val = read_fd(fd, &nl_found)) < 0)
-			{
-            	return (read_val);
-            }
+				return (read_val);
 		str = extract_line(str);
 		if (read_val == 0 && !str)
 			return (0);
 		*line = str;
+		if (!fd && read_val != 0)
+			return (1);
 		if (!BUFFER[0])
 			return (0);
 		return (1);
 	}
 	return (-1);
 }
+
