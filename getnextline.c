@@ -8,7 +8,7 @@ static char			*get_buffer(int mode)
 	{
 		if (!(buffer = (char *)malloc(sizeof(char) * (1 + BUFF_SIZE))))
 			return (NULL);
-		ft_bzero(buffer, BUFF_SIZE + 1);
+		ft_memset(buffer, '\0', BUFF_SIZE + 1);
 	}
 	if (mode == 0)
 		return (buffer);
@@ -25,10 +25,9 @@ int				read_fd(const int fd, int *nl_found)
 {
 	int				nb;
 
-	nb = read(fd, BUFFER, BUFF_SIZE);
-	if (nb <= 0)
-		return (nb);
-	BUFFER[nb] = '\0';
+	if ((nb = read(fd, BUFFER, BUFF_SIZE)) < 1)
+       return (nb);
+	ft_memset(BUFFER + nb, '\0', BUFF_SIZE - nb);
 	if (ft_strchr(BUFFER, '\n'))
 		*nl_found = 1;
 	return (1);
