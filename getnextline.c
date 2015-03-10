@@ -1,6 +1,4 @@
-#include "getnextline.h"
-
-static char			*get_buffer(void)
+static char			*get_buffer(int mode)
 {
 	static char		*buffer = NULL;
 	int				i;
@@ -12,6 +10,8 @@ static char			*get_buffer(void)
 			return (NULL);
 		ft_bzero(buffer, BUFF_SIZE + 1);
 	}
+	if (mode == 0)
+		return (buffer);
 	while (buffer[i] == '\0')
 	{
 		if (i == BUFF_SIZE)
@@ -29,7 +29,8 @@ int				read_fd(const int fd, int *nl_found)
 	if (nb <= 0)
 		return (nb);
 	BUFFER[nb] = '\0';
-
+	if (ft_strchr(BUFFER, '\n'))
+		*nl_found = 1;
 	return (1);
 }
 
@@ -40,23 +41,23 @@ char			*extract_line(char *line)
 	char			*buffer;
 
 	buffer = BUFFER;
-	tmp = ft_strchr(BUFFER, '\n');
+	if (!*buffer)
+		return (line);
+	tmp = ft_strchr(buffer, '\n');
 	if (tmp)
 	{
 		*tmp = '\0';
-		ret = ft_strjoin(line, tmp)
+		ret = ft_strjoin(line, buffer);
 		while (tmp != buffer)
 		{
-			*tmp = '\0';
 			tmp--;
+			*tmp = '\0';
 		}
-		*tmp = '\0';
 	}
 	else
-		ret = ft_strjoin(line, tmp)
+		ret = ft_strjoin(line, buffer);
 	free(line);
 	return (ret);
-
 }
 
 int				get_next_line(const int fd, char **line)
@@ -67,16 +68,17 @@ int				get_next_line(const int fd, char **line)
 
 	str = NULL;
 	nl_found = 0;
+	read_val = 0;
 	while (!nl_found)
 	{
-		if ((read_val = read_fd(fd, &nl_found)) == 0)
-			return (read_val);
+		if (!BUFFER[0])
+			if ((read_val = read_fd(fd, &nl_found)) < 0)
+				return (read_val);
 		str = extract_line(str);
 		if (read_val == 0 && !str)
 			return (0);
 		*line = str;
 		return (1);
 	}
-
-
+	return (-1);
 }
