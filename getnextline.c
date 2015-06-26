@@ -83,13 +83,15 @@ int				get_next_line(const int fd, char **line)
 			if ((read_val = read_fd(fd, &nl_found)) < 0)
 				return (read_val);
 		str = extract_line(str);
-		if (read_val == 0 && !str)
+		if (!read_val && !str)
 			return (0);
 		*line = str;
 		if (!fd && read_val != 0)
 			return (1);
-		if (!BUFFER[0])
+		if (!fd && !read_val)
 			return (0);
+		//if (!BUFFER[0])
+		//	return (0);
 		return (1);
 	}
 	return (-1);
